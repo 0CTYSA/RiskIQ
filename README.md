@@ -1,38 +1,58 @@
-# Passive Data Collector
+# test.py
 
-El Passive Data Collector es un script de Python que te permite obtener y guardar datos de DNS, WHOIS y certificados SSL para dominios e direcciones IP. Utiliza la biblioteca `passivetotal` para realizar las solicitudes y guarda los resultados en archivos JSON.
+`test.py` es un script de Python para hacer consultas a la API de PassiveTotal y almacenar los resultados en archivos JSON. El script consulta los servicios DNS pasivos, SSL y WHOIS de una dirección IP o dominio ingresado por el usuario.
 
 ## Requisitos
 
-- Python 3.x
-- Biblioteca `passivetotal` (puedes instalarla ejecutando `pip install passivetotal`)
+Para utilizar este script, necesitarás lo siguiente:
+
+- Python instalado en tu máquina.
+- Una cuenta en PassiveTotal.
+- Una llave API de PassiveTotal.
+
+Puedes obtener la llave API de PassiveTotal en la configuración de tu cuenta. Una vez que la tengas, añádela al script en las variables `USERNAME` y `KEY` en la parte superior del script:
+
+```python
+USERNAME = "your@email.here"
+KEY = "API key from account settings"
+```
+
+Reemplaza `"your@email.here"` con tu correo electrónico de PassiveTotal y `"API key from account settings"` con tu llave API.
+
+## Funciones del script
+
+- `passivetotal_get`: Función para hacer consultas GET a la API de PassiveTotal.
+- `is_valid_ip`: Función para validar si un texto es una dirección IP válida.
+- `is_valid_domain`: Función para validar si un texto es un nombre de dominio válido.
 
 ## Uso
 
-1. Clona este repositorio o descarga el archivo `risk.py` en tu máquina.
-
-2. Ejecuta el script proporcionando una o más consultas de dominio o dirección IP como argumentos:
+Para ejecutar el script, asegúrate de tener Python instalado en tu máquina, luego ejecuta el siguiente comando en tu terminal:
 
 ```bash
-risk.py consulta1.com 192.168.0.1 example.com
+python test.py
 ```
 
-3. El script obtendrá los datos de DNS, WHOIS y SSL para cada consulta válida y los guardará en archivos JSON en un directorio correspondiente a cada consulta. Por ejemplo, si tu consulta es `consulta1.com`, los archivos JSON se guardarán en un directorio llamado `consulta1.com`.
+Cuando se te pida, ingresa la dirección IP o el dominio que deseas consultar. Por ejemplo:
 
-4. Puedes verificar los archivos JSON generados para cada consulta para acceder a los datos obtenidos.
+```
+Por favor, introduzca un dominio o IP: example.com
+```
 
-## Configuración
+El script realizará las consultas a la API de PassiveTotal y almacenará los resultados en la carpeta `Results` dentro del directorio `RiskPI`. Se creará una carpeta con el nombre del dominio o IP consultado, y dentro de esta carpeta se guardarán los archivos JSON con los resultados.
 
-El script utiliza la biblioteca `passivetotal` para realizar las solicitudes de datos. Para utilizarla, debes configurar las credenciales de autenticación en un archivo de configuración. Asegúrate de seguir las instrucciones de configuración proporcionadas por la biblioteca `passivetotal` para autenticarte correctamente.
+## Estructura de archivos de salida
 
-## Contribuciones
+Los resultados de las consultas a la API de PassiveTotal se guardan en la siguiente estructura de archivos:
 
-Si deseas contribuir a este proyecto, puedes enviar un pull request. Apreciamos tu interés y aportes.
+```
+RiskPI/
+└── Results/
+    └── [Dominio_o_IP]/
+        ├── dns_passive_results.json
+        ├── services_results.json (solo para direcciones IP)
+        ├── ssl_history_results.json
+        └── whois_results.json
+```
 
-## Problemas
-
-Si encuentras algún problema o tienes alguna pregunta, siéntete libre de abrir un issue en este repositorio. Intentaremos resolverlo lo antes posible.
-
-## Atribución
-
-Este script utiliza la biblioteca `passivetotal`, que es propiedad de su respectivo autor. Consulta la documentación de la biblioteca para obtener más información sobre su uso y atribución.
+Cada archivo JSON contiene los resultados de una consulta específica a la API de PassiveTotal.
