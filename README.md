@@ -9,12 +9,12 @@ El Passive Data Collector es un script de Python que te permite obtener y guarda
 
 ## Uso
 
-1. Clona este repositorio o descarga el archivo `passive_data_collector.py` en tu máquina.
+1. Clona este repositorio o descarga el archivo `risk.py` en tu máquina.
 
 2. Ejecuta el script proporcionando una o más consultas de dominio o dirección IP como argumentos:
 
 ```bash
-python passive_data_collector.py consulta1.com 192.168.0.1 example.com
+risk.py consulta1.com 192.168.0.1 example.com
 ```
 
 3. El script obtendrá los datos de DNS, WHOIS y SSL para cada consulta válida y los guardará en archivos JSON en un directorio correspondiente a cada consulta. Por ejemplo, si tu consulta es `consulta1.com`, los archivos JSON se guardarán en un directorio llamado `consulta1.com`.
