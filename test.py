@@ -5,9 +5,12 @@ import requests
 import json
 import os
 
-username = 'juan.hernandez@appgate.com'
-key = '9b2cfc90db4ddb915741c03974241d7e020482330f422da8d92247555f7f93cb'
-auth = (username, key)
+with open('to.json', 'r') as file:
+    credentials = json.load(file)
+
+USERNAME = credentials['USERNAME']
+KEY = credentials['KEY']
+auth = (USERNAME, KEY)
 base_url = 'https://api.riskiq.net/pt'
 
 
