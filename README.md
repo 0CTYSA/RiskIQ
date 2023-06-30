@@ -1,5 +1,3 @@
-¡Claro! Aquí tienes un ejemplo de cómo podría ser el archivo README para el código proporcionado:
-
 # Passive Data Collector
 
 El Passive Data Collector es un script de Python que te permite obtener y guardar datos de DNS, WHOIS y certificados SSL para dominios e direcciones IP. Utiliza la biblioteca `passivetotal` para realizar las solicitudes y guarda los resultados en archivos JSON.
