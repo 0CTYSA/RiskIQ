@@ -81,22 +81,26 @@ with open(os.path.join(results_folder, 'whois_results.json'), 'w', encoding='utf
 with open(os.path.join(results_folder, 'dns_passive_results.json'), 'r', encoding='utf8') as file:
     dns_passive_results = json.load(file)
 
-# Crear un conjunto para almacenar los dominios y las IPs únicas
-domains = set()
-ips = set()
+# Crear una lista para almacenar los dominios y las IPs con sus fechas de recolección
+results = []
 
 # Iterar sobre los resultados y agregar los dominios y las IPs al conjunto
 for result in dns_passive_results.get('results', []):
-    if 'resolve' in result and result['resolve']:
-        domains.add(result['resolve'])
-    if 'value' in result and result['value']:
-        ips.add(result['value'])
+    if 'resolve' in result and result['resolve'] and 'value' in result and result['value'] and 'collected' in result and result['collected']:
+        item = {
+            'domain': result['resolve'],
+            'ip': result['value'],
+            'collected': result['collected']
+        }
+        results.append(item)
 
-# Escribir los dominios y las IPs en un archivo de texto
-with open(os.path.join(results_folder, 'unique_domains_and_ips.txt'), 'w', encoding='utf8') as file:
-    file.write('\n'.join(domains))
-    file.write('\n')
-    file.write('\n'.join(ips))
+# Ordenar los resultados por fecha de recolección
+results.sort(key=lambda x: x['collected'])
+
+# Escribir solo los dominios en un archivo de texto, ordenados por la fecha de recolección
+with open(os.path.join(results_folder, 'ordered_domains.txt'), 'w', encoding='utf8') as file:
+    for item in results:
+        file.write(f"{item['domain']}\n")
 
 print(
-    f"Los dominios e IPs únicas se han guardado en el archivo 'unique_domains_and_ips.txt' dentro de la carpeta '{folder_name}' en 'RiskPI/Results'.")
+    f"Los dominios ordenados se han guardado en el archivo 'ordered_domains.txt' dentro de la carpeta '{folder_name}' en 'RiskPI/Results'.")
