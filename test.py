@@ -61,9 +61,8 @@ ssl_history_results = get_ssl_history(params=ssl_history_params)
 whois_results = get_whois(params=whois_params)
 
 folder_name = query.replace('/', '_') if '/' in query else query
-results_folder = os.path.join('RiskPI', 'Results', folder_name)
+results_folder = os.path.join('Results', folder_name)
 os.makedirs(results_folder, exist_ok=True)
-
 
 with open(os.path.join(results_folder, 'dns_passive_results.json'), 'w', encoding='utf8') as file:
     json.dump(dns_passive_results, file, indent=4, ensure_ascii=False)
@@ -78,5 +77,26 @@ with open(os.path.join(results_folder, 'ssl_history_results.json'), 'w', encodin
 with open(os.path.join(results_folder, 'whois_results.json'), 'w', encoding='utf8') as file:
     json.dump(whois_results, file, indent=4, ensure_ascii=False)
 
+# Cargar los datos JSON
+with open(os.path.join(results_folder, 'dns_passive_results.json'), 'r', encoding='utf8') as file:
+    dns_passive_results = json.load(file)
+
+# Crear un conjunto para almacenar los dominios y las IPs únicas
+domains = set()
+ips = set()
+
+# Iterar sobre los resultados y agregar los dominios y las IPs al conjunto
+for result in dns_passive_results.get('results', []):
+    if 'resolve' in result and result['resolve']:
+        domains.add(result['resolve'])
+    if 'value' in result and result['value']:
+        ips.add(result['value'])
+
+# Escribir los dominios y las IPs en un archivo de texto
+with open(os.path.join(results_folder, 'unique_domains_and_ips.txt'), 'w', encoding='utf8') as file:
+    file.write('\n'.join(domains))
+    file.write('\n')
+    file.write('\n'.join(ips))
+
 print(
-    f"Los resultados se han guardado en la carpeta '{folder_name}' dentro de 'RiskPI/Results'.")
+    f"Los dominios e IPs únicas se han guardado en el archivo 'unique_domains_and_ips.txt' dentro de la carpeta '{folder_name}' en 'RiskPI/Results'.")
