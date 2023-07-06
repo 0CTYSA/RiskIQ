@@ -1,5 +1,1 @@
-# Ignorar las carpetas creadas después de ejecutar el código
-*/
-
-# Ignorar los archivos JSON generados
-*.json
+Results/*.json
