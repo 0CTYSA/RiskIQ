@@ -4,6 +4,8 @@ import socket
 import requests
 import json
 import os
+import customtkinter as ctk
+from customtkinter import *
 
 
 class PassiveTotalClient:
@@ -103,13 +105,7 @@ def cli():
     pass
 
 
-@cli.command(help="Ejecuta las consultas basadas en el dominio o IP proporcionado.")
-@click.option(
-    '--query',
-    prompt='Por favor, introduzca un dominio o IP',
-    help='El dominio o IP a consultar. Debe ser una dirección IP válida o un nombre de dominio resoluble.'
-)
-def run(query):
+def run_script(query, choice):
     with open('to.json', 'r') as file:
         credentials = json.load(file)
 
@@ -118,43 +114,94 @@ def run(query):
     file_manager = FileManager()
 
     if not validator.is_valid_ip(query) and not validator.is_valid_domain(query):
-        click.echo(
-            "La entrada proporcionada no es un dominio ni una IP válida. Terminando el programa.")
-        return
+        return "La entrada proporcionada no es un dominio ni una IP válida. Terminando el programa."
 
     params = {'query': query}
     folder_name = query.replace('/', '_') if '/' in query else query
     results_folder = os.path.join('Results', folder_name)
 
-    while True:
-        display_menu()
-        choice = input("Ingrese el número de la opción que desea: ")
+    if choice == "Consultar DNS pasivo":
+        result = client.get_dns_passive(params=params)
+        file_manager.save_results(
+            results_folder, 'dns_passive_results.json', result)
+        processor = ResultProcessor(results_folder, result)
+        processor.process_and_save_results()
+    elif choice == "Consultar servicios":
+        result = client.get_services(params=params)
+        file_manager.save_results(
+            results_folder, 'services_results.json', result)
+    elif choice == "Consultar historial SSL":
+        result = client.get_ssl_history(params=params)
+        file_manager.save_results(
+            results_folder, 'ssl_history_results.json', result)
+    elif choice == "Consultar WHOIS":
+        result = client.get_whois(params=params)
+        file_manager.save_results(results_folder, 'whois_results.json', result)
+    elif choice == "Salir":
+        return "Saliendo del programa."
 
-        if choice == '1':
-            result = client.get_dns_passive(params=params)
-            file_manager.save_results(
-                results_folder, 'dns_passive_results.json', result)
-            # Crear el procesador de resultados
-            processor = ResultProcessor(results_folder, result)
-            # Procesar y guardar los resultados ordenados
-            processor.process_and_save_results()
-        elif choice == '2':
-            result = client.get_services(params=params)
-            file_manager.save_results(
-                results_folder, 'services_results.json', result)
-        elif choice == '3':
-            result = client.get_ssl_history(params=params)
-            file_manager.save_results(
-                results_folder, 'ssl_history_results.json', result)
-        elif choice == '4':
-            result = client.get_whois(params=params)
-            file_manager.save_results(
-                results_folder, 'whois_results.json', result)
-        elif choice == '5':
-            break  # Salir del bucle
-        else:
-            print("Opción no válida. Por favor, intente de nuevo.")
+    return "Consulta completada. Revise la carpeta 'Results' para ver los resultados."
 
 
-if __name__ == '__main__':
-    cli()
+class PlaceholderEntry(ctk.CTkEntry):
+    def __init__(self, master, placeholder, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self.placeholder = placeholder
+        self.insert(0, self.placeholder)
+        self.bind("<FocusIn>", self._clear_placeholder)
+        self.bind("<FocusOut>", self._add_placeholder)
+
+    def _clear_placeholder(self, e):
+        if self.get() == self.placeholder:
+            self.delete(0, ctk.END)
+
+    def _add_placeholder(self, e):
+        if not self.get():
+            self.insert(0, self.placeholder)
+
+
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Consulta de dominio/IP")
+        self.root.geometry("500x500")
+        self.root.resizable(False, False)
+
+        self.query_entry = PlaceholderEntry(
+            root, placeholder="Introduce un dominio o IP")
+        self.query_entry.pack(pady=10)
+
+        self.options = ["Consultar DNS pasivo", "Consultar servicios",
+                        "Consultar historial SSL", "Consultar WHOIS", "Salir"]
+        # Usa CTkComboBox en lugar de CTkOptionMenu
+        self.option_menu = CTkComboBox(root, values=self.options)
+        self.option_menu.pack(pady=10)
+
+        self.run_button = CTkButton(root, text="Ejecutar", command=self.run)
+        self.run_button.pack()
+
+        self.result_text = ctk.CTkTextbox(
+            root, width=80, height=20)  # Corregido a CTkTextbox
+        self.result_text.pack(pady=10)
+
+    def run(self):
+        query = self.query_entry.get()
+        choice = self.option_menu.get()
+        # Asegúrate de que run_script pueda manejar el argumento choice
+        result = run_script(query, choice)
+        self.result_text.delete(1.0, ctk.END)
+        self.result_text.insert(ctk.END, result)
+
+
+def main():
+    root = ctk.CTk()  # Usa ctk.CTk como antes
+    app = App(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    use_gui = True
+    if use_gui:
+        main()
+    else:
+        cli()
