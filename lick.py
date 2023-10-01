@@ -115,13 +115,13 @@ console = Console()
 def display_intro():
     console.print(
         "\n[bold cyan]Bienvenido al sistema de consulta de dominio/IP en RiskIQ[/bold cyan]")
-    console.print("Este programa le permite realizar consultas de DNS pasivo, "
+    console.print("Este programa permite realizar consultas de DNS pasivo, "
                   "consultas de servicios, consultas de historial SSL y consultas WHOIS "
                   "a un dominio o IP específicos.\n")
 
 
 def display_menu():
-    table = Table(title="¿Deseas seleccionar una opción?")
+    table = Table(title="Escoge una opción:")
     table.add_column("Item", justify="center", style="cyan", no_wrap=True)
     table.add_column("Opción")
 
@@ -149,7 +149,7 @@ def display_options():
 
 
 def display_exit_menu():
-    table = Table(title="Seleccione una opción:")
+    table = Table(title="Escoge una opción:")
     table.add_column("Item", justify="center", style="cyan", no_wrap=True)
     table.add_column("Opción")
 
@@ -251,7 +251,16 @@ def run_script(query, choice):
     elif choice == "5":
         return "Saliendo del programa."
 
-    return "Consulta completada. Revise la carpeta 'Results' para ver los resultados."
+ # Obtén la ruta completa a la carpeta 'Results'
+    project_path = os.getcwd()  # Obtén la ruta del directorio actual
+    # Construye la ruta completa a la carpeta 'Results'
+    results_path = os.path.join(project_path, 'Results')
+
+    result_message = (
+        "Consulta completada. Revise la carpeta 'Results' en la siguiente ruta para ver los resultados:\n"
+        f"[bold cyan]{results_path}[/bold cyan]\n"  # Resalta y colorea la ruta
+    )
+    return result_message
 
 
 if __name__ == "__main__":
