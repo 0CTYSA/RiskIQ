@@ -4,8 +4,8 @@ import socket
 import requests
 import json
 import os
-import customtkinter as ctk
-from customtkinter import *
+import colorama
+from colorama import Fore, Style
 
 
 class PassiveTotalClient:
@@ -91,13 +91,81 @@ class ResultProcessor:
                 file.write(f"{item['domain']}\n")
 
 
+# inicializa colorama
+colorama.init()
+
+
+def display_intro():
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40)
+    print(f"{Fore.GREEN}Bienvenido al sistema de consulta de dominio/IP en RiskIQ")
+    print(Fore.WHITE + "Este programa le permite realizar consultas de DNS pasivo,")
+    print("consultas de servicios, consultas de historial SSL y consultas ")
+    print("WHOIS a un dominio o IP específicos.")
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + Style.RESET_ALL)
+
+
 def display_menu():
-    print("Seleccione una opción:")
-    print("1. Consultar DNS pasivo")
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40)
+    print(f"{Fore.GREEN}Seleccione una opción:")
+    print(Fore.BLUE + "1. Consultar DNS pasivo")
     print("2. Consultar servicios")
     print("3. Consultar historial SSL")
     print("4. Consultar WHOIS")
-    print("5. Salir")
+    print(Fore.RED + "5. Salir")
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + Style.RESET_ALL)
+
+
+def display_exit_menu():
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40)
+    print(f"{Fore.GREEN}Seleccione una opción:")
+    print(Fore.BLUE + "1. Escoger otra opción")
+    print(Fore.RED + "2. Salir")
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + Style.RESET_ALL)
+
+
+def is_valid_option(option):
+    return option in ["1", "2", "3", "4", "5"]
+
+
+def main():
+    display_intro()
+    while True:
+        display_menu()
+        choice = input(Fore.GREEN + Style.BRIGHT +
+                       "Ingrese su opción: " + Style.RESET_ALL)
+        while not is_valid_option(choice):
+            print(
+                Fore.RED + "Opción no válida. Por favor, intente de nuevo." + Style.RESET_ALL)
+            choice = input(Fore.GREEN + Style.BRIGHT +
+                           "Ingrese su opción: " + Style.RESET_ALL)
+        if choice == "5":
+            print(Fore.RED + "Saliendo del programa." + Style.RESET_ALL)
+            break
+        query = input(Fore.GREEN + Style.BRIGHT +
+                      "Ingrese un dominio o IP: " + Style.RESET_ALL)
+        while not (Validator.is_valid_ip(query) or Validator.is_valid_domain(query)):
+            print(
+                Fore.RED + "Dominio o IP no válidos. Por favor, intente de nuevo." + Style.RESET_ALL)
+            query = input(Fore.GREEN + Style.BRIGHT +
+                          "Ingrese un dominio o IP: " + Style.RESET_ALL)
+        print(Fore.YELLOW +
+              "Procesando su solicitud, por favor espere..." + Style.RESET_ALL)
+        result = run_script(query, choice)
+        print(result)
+
+        while True:
+            display_exit_menu()
+            exit_choice = input(Fore.GREEN + Style.BRIGHT +
+                                "Ingrese su opción: " + Style.RESET_ALL)
+            if exit_choice == "1":
+                break  # Rompe el bucle interno y regresa al bucle principal para escoger otra opción
+            elif exit_choice == "2":
+                print(
+                    Fore.RED + "Finalizando proceso. Gracias por usar el programa." + Style.RESET_ALL)
+                return  # Sale de la función main y termina el programa
+            else:
+                print(
+                    Fore.RED + "Opción no válida. Por favor, intente de nuevo." + Style.RESET_ALL)
 
 
 @click.group()
@@ -120,88 +188,28 @@ def run_script(query, choice):
     folder_name = query.replace('/', '_') if '/' in query else query
     results_folder = os.path.join('Results', folder_name)
 
-    if choice == "Consultar DNS pasivo":
+    if choice == "1":
         result = client.get_dns_passive(params=params)
         file_manager.save_results(
             results_folder, 'dns_passive_results.json', result)
         processor = ResultProcessor(results_folder, result)
         processor.process_and_save_results()
-    elif choice == "Consultar servicios":
+    elif choice == "2":
         result = client.get_services(params=params)
         file_manager.save_results(
             results_folder, 'services_results.json', result)
-    elif choice == "Consultar historial SSL":
+    elif choice == "3":
         result = client.get_ssl_history(params=params)
         file_manager.save_results(
             results_folder, 'ssl_history_results.json', result)
-    elif choice == "Consultar WHOIS":
+    elif choice == "4":
         result = client.get_whois(params=params)
         file_manager.save_results(results_folder, 'whois_results.json', result)
-    elif choice == "Salir":
+    elif choice == "5":
         return "Saliendo del programa."
 
     return "Consulta completada. Revise la carpeta 'Results' para ver los resultados."
 
 
-class PlaceholderEntry(ctk.CTkEntry):
-    def __init__(self, master, placeholder, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self.placeholder = placeholder
-        self.insert(0, self.placeholder)
-        self.bind("<FocusIn>", self._clear_placeholder)
-        self.bind("<FocusOut>", self._add_placeholder)
-
-    def _clear_placeholder(self, e):
-        if self.get() == self.placeholder:
-            self.delete(0, ctk.END)
-
-    def _add_placeholder(self, e):
-        if not self.get():
-            self.insert(0, self.placeholder)
-
-
-class App:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Consulta de dominio/IP")
-        self.root.geometry("500x500")
-        self.root.resizable(False, False)
-
-        self.query_entry = PlaceholderEntry(
-            root, placeholder="Introduce un dominio o IP")
-        self.query_entry.pack(pady=10)
-
-        self.options = ["Consultar DNS pasivo", "Consultar servicios",
-                        "Consultar historial SSL", "Consultar WHOIS", "Salir"]
-        # Usa CTkComboBox en lugar de CTkOptionMenu
-        self.option_menu = CTkComboBox(root, values=self.options)
-        self.option_menu.pack(pady=10)
-
-        self.run_button = CTkButton(root, text="Ejecutar", command=self.run)
-        self.run_button.pack()
-
-        self.result_text = ctk.CTkTextbox(
-            root, width=80, height=20)  # Corregido a CTkTextbox
-        self.result_text.pack(pady=10)
-
-    def run(self):
-        query = self.query_entry.get()
-        choice = self.option_menu.get()
-        # Asegúrate de que run_script pueda manejar el argumento choice
-        result = run_script(query, choice)
-        self.result_text.delete(1.0, ctk.END)
-        self.result_text.insert(ctk.END, result)
-
-
-def main():
-    root = ctk.CTk()  # Usa ctk.CTk como antes
-    app = App(root)
-    root.mainloop()
-
-
 if __name__ == "__main__":
-    use_gui = True
-    if use_gui:
-        main()
-    else:
-        cli()
+    main()
