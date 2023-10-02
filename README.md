@@ -28,6 +28,11 @@ Puedes obtener la llave API de PassiveTotal en la configuración de tu cuenta. U
 'requests',
 'rich',
 'socket']` instaladas en tu máquina.
+
+```py
+pip install -r requirements.txt
+```
+
 2. Ejecuta el script con el siguiente comando:
 
 ```bash
